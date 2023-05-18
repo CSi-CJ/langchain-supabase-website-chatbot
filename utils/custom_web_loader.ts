@@ -3,6 +3,8 @@ import { Document } from 'langchain/document';
 import { BaseDocumentLoader } from 'langchain/document_loaders';
 import type { DocumentLoader } from 'langchain/document_loaders';
 import { CheerioWebBaseLoader } from 'langchain/document_loaders';
+import fetch from 'node-fetch';
+
 
 export class CustomWebLoader
   extends BaseDocumentLoader
@@ -14,9 +16,10 @@ export class CustomWebLoader
 
   static async _scrape(url: string): Promise<CheerioAPI> {
     const { load } = await CustomWebLoader.imports();
-    const response = await fetch(url);
-    const html = await response.text();
-    return load(html);
+    // const response = await fetch(url);
+    // const html = await response.text();
+    const response = await fetch(url).then(res => res.text());
+    return load(response);
   }
 
   async scrape(): Promise<CheerioAPI> {

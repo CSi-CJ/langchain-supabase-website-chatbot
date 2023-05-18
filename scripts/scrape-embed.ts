@@ -6,7 +6,10 @@ import { Embeddings, OpenAIEmbeddings } from 'langchain/embeddings';
 import { SupabaseVectorStore } from 'langchain/vectorstores';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { supabaseClient } from '@/utils/supabase-client';
+import { createClient } from '@supabase/supabase-js'
 import { urls } from '@/config/notionurls';
+import fetch from 'node-fetch'
+import { Configuration, OpenAIApi } from 'openai'
 
 async function extractDataFromUrl(url: string): Promise<Document[]> {
   try {
@@ -39,9 +42,32 @@ async function embedDocuments(
   embeddings: Embeddings,
 ) {
   console.log('creating embeddings...');
-  await SupabaseVectorStore.fromDocuments(client, docs, embeddings);
+  const configuration = new Configuration({ apiKey: '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' })
+  const openAi = new OpenAIApi(configuration)
+  // Assuming each document is a string
+  for (const document of docs) {
+    // OpenAI recommends replacing newlines with spaces for best results
+    const input = document.pageContent.replace(/\n/g, ' ')
+
+    const embeddingResponse = await openAi.createEmbedding({
+      model: 'text-embedding-ada-002',
+      input,
+    })
+
+    const [{ embedding }] = embeddingResponse.data.data
+
+    // In production we should handle possible errors
+    await supabaseClient.from('documents').insert({
+      content: document.pageContent,
+      metadata: document.metadata,
+      embedding,
+    })
+  }
+  // const vectorStore = new SupabaseVectorStore(client, embeddings);
+  // await vectorStore.addDocuments(docs);
   console.log('embeddings successfully stored in supabase');
 }
+
 
 async function splitDocsIntoChunks(docs: Document[]): Promise<Document[]> {
   const textSplitter = new RecursiveCharacterTextSplitter({

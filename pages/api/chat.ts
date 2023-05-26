@@ -22,6 +22,7 @@ export default async function handler(
     supabaseClient,
     new OpenAIEmbeddings(),
   );
+  // console.log(123456, vectorStore)
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -43,6 +44,7 @@ export default async function handler(
 
   try {
     //Ask a question
+    // console.log(77777777777777777777777, chain);
     const response = await chain.call({
       question: sanitizedQuestion,
       chat_history: history || [],
@@ -51,6 +53,8 @@ export default async function handler(
     console.log('response', response);
   } catch (error) {
     console.log('error', error);
+    console.log(8888888888888888888888888888888);
+
   } finally {
     sendData('[DONE]');
     res.end();

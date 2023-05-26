@@ -29,10 +29,10 @@ async function extractDataFromUrls(urls: string[]): Promise<Document[]> {
     const docs = await extractDataFromUrl(url);
     documents.push(...docs);
   }
-  console.log('data extracted from urls');
-  const json = JSON.stringify(documents);
-  await fs.writeFile('franknotion.json', json);
-  console.log('json file containing data saved on disk');
+  // console.log('data extracted from urls');
+  // const json = JSON.stringify(documents);
+  // await fs.writeFile('franknotion.json', json);
+  // console.log('json file containing data saved on disk');
   return documents;
 }
 
@@ -42,7 +42,7 @@ async function embedDocuments(
   embeddings: Embeddings,
 ) {
   console.log('creating embeddings...');
-  const configuration = new Configuration({ apiKey: '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' })
+  const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY })
   const openAi = new OpenAIApi(configuration)
   // Assuming each document is a string
   for (const document of docs) {
